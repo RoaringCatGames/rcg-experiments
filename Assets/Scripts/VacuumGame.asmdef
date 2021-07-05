@@ -1,0 +1,6 @@
+{
+	"name": "VacuumGame",
+	"references": [
+		"Unity.InputSystem"
+	]
+}
