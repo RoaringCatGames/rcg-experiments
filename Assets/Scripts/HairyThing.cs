@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using DefaultNamespace.Math;
 using TreeEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -38,21 +39,12 @@ namespace DefaultNamespace
                 var targetDegrees = i * angleWidth;
                 var hair = Instantiate(ropePrefab, transform);
                 var rope = hair.GetComponent<Rope>();
-                rope.gravity = DegreeToVector2(targetDegrees) * new Vector2(xMag, yMag);
+                rope.gravity = VectorUtils.DegreeToVector2(targetDegrees) * new Vector2(xMag, yMag);
+                // rope.gravity = new Vector2(rope.gravity.x, -Math.Abs(rope.gravity.y));
                 rope.ropeSegmentLength = len;
                 rope.lineWidth = width;
                 _hairs.Add(hair);
             }
-        }
-        
-        public static Vector2 RadianToVector2(float radian)
-        {
-            return new Vector2(Mathf.Cos(radian), Mathf.Sin(radian));
-        }
-      
-        public static Vector2 DegreeToVector2(float degree)
-        {
-            return RadianToVector2(degree * Mathf.Deg2Rad);
         }
     }
 }

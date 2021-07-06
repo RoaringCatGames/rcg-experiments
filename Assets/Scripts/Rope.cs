@@ -13,24 +13,27 @@ namespace DefaultNamespace
         [SerializeField] public float lineWidth = 0.1f;
         [SerializeField] public Vector2 gravity = new Vector2(0f, -1f);
         [SerializeField] public int constraintIterations = 50;
+        [SerializeField] public bool shouldPinStartingPoint = false;
+        [SerializeField] public bool shouldTailFollowMouse = false;
 
         private LineRenderer _lineRenderer;
         private readonly List<RopeSegment> _ropeSegments = new List<RopeSegment>();
         private Camera _camera;
         private bool _isCameraNotNull;
+        private Vector3 _startingPoint;
 
         private void Start()
         {
             _camera = Camera.main;
             _isCameraNotNull = _camera != null;
             _lineRenderer = GetComponent<LineRenderer>();
-            var ropeStartPoint = GetMousePosition();
+            _startingPoint = shouldPinStartingPoint ? transform.position : GetMousePosition();
             
 
 
             foreach (var index in Enumerable.Range(0, segmentCount))
             {
-                _ropeSegments.Add(new RopeSegment(ropeStartPoint + (Vector3.down * ropeSegmentLength * index)));   
+                _ropeSegments.Add(new RopeSegment(_startingPoint + (Vector3.down * ropeSegmentLength * index)));   
             }
         }
 
@@ -69,8 +72,14 @@ namespace DefaultNamespace
             {
                 var first = _ropeSegments[i];
                 var velocity = first.currentPosition - first.previousPosition;
+                var appliedGravity = gravity;
+                if (shouldTailFollowMouse)
+                {
+                    var mousePosition = GetMousePosition();
+                    appliedGravity = (mousePosition - _startingPoint).normalized * appliedGravity.magnitude;
+                }
                 first.previousPosition = first.currentPosition;
-                first.currentPosition += velocity + gravity * Time.deltaTime;
+                first.currentPosition += velocity + appliedGravity * Time.deltaTime;
                 _ropeSegments[i] = first;
             }
             
@@ -85,8 +94,18 @@ namespace DefaultNamespace
         private void ApplyConstraint()
         {
             var firstSegment = _ropeSegments[0];
-            firstSegment.currentPosition = GetMousePosition();
+            firstSegment.currentPosition = shouldPinStartingPoint ? _startingPoint : GetMousePosition();
             _ropeSegments[0] = firstSegment;
+
+            // if (shouldTailFollowMouse)
+            // {
+            //     var mousePosition = GetMousePosition();
+            //     Vector2 direction = (mousePosition - _startingPoint).normalized;
+            //
+            //     var lastSegment = _ropeSegments.Last();
+            //     lastSegment.currentPosition += direction;
+            //     _ropeSegments[_ropeSegments.Count - 1] = lastSegment;
+            // }
 
             for (var i = 0; i < _ropeSegments.Count - 1; i++)
             {
@@ -103,7 +122,7 @@ namespace DefaultNamespace
                     rh.currentPosition += changeAmount * 0.5f;
                     _ropeSegments[i + 1] = rh;
                 }
-                else
+                else //if (i != _ropeSegments.Count - 2)
                 {
                     rh.currentPosition += changeAmount;
                     _ropeSegments[i + 1] = rh;
