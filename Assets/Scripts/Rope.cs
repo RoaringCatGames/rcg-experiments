@@ -15,6 +15,7 @@ namespace DefaultNamespace
         [SerializeField] public int constraintIterations = 50;
         [SerializeField] public bool shouldPinStartingPoint = false;
         [SerializeField] public bool shouldTailFollowMouse = false;
+        [SerializeField] public bool shouldTaperTail = true;
 
         private LineRenderer _lineRenderer;
         private readonly List<RopeSegment> _ropeSegments = new List<RopeSegment>();
@@ -57,7 +58,7 @@ namespace DefaultNamespace
             var width = lineWidth;
 
             _lineRenderer.startWidth = width;
-            _lineRenderer.endWidth = width;
+            _lineRenderer.endWidth = width * (shouldTaperTail ? 0.1f : 1f);
             
 
             var ropePositions = _ropeSegments.Select((rs) => (Vector3)rs.currentPosition).ToArray();
